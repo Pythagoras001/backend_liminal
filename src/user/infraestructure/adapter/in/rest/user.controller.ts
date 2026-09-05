@@ -37,12 +37,12 @@ export class UserController {
     });
   }
 
-  @Patch(':id')
+  @Patch('update')
   async update(
-    @Param('id') id: string,
+    @CurrentUser() currentUser: JwtPayload,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<ResponseUserDto> {
-    const user = await this.userService.update(id, updateUserDto);
+    const user = await this.userService.update(currentUser.sub, updateUserDto);
 
     return plainToInstance(ResponseUserDto, user, {
       excludeExtraneousValues: true,
