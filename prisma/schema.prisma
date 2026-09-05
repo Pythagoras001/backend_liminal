@@ -12,7 +12,7 @@ datasource db {
   provider = "sqlite"
 }
 
-model User {
+model UserPersist {
   id        String   @id @default(uuid())
   userName  String   @unique
   email     String   @unique
