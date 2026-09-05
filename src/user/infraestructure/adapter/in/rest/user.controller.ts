@@ -6,6 +6,8 @@ import { UpdateUserDto } from '../../dto/request/update-user.dto';
 import { ResponseUserDto } from '../../dto/response/response-user.dto';
 import { UserQueryService } from '../../../../application/user.query.service';
 import { Public } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/public-access.decorator';
+import { CurrentUser } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/current-user.decorator';
+import type { JwtPayload } from '../../../../../auth/infraestructure/security/jwt-payload.interface';
 
 @Controller('user')
 export class UserController {
@@ -24,9 +26,11 @@ export class UserController {
     });
   }
 
-  @Get(':id')
-  async findById(@Param('id') id: string): Promise<ResponseUserDto> {
-    const user = await this.userQueryService.findById(id);
+  @Get('me')
+  async findMe(
+    @CurrentUser() currentUser: JwtPayload,
+  ): Promise<ResponseUserDto> {
+    const user = await this.userQueryService.findById(currentUser.sub);
 
     return plainToInstance(ResponseUserDto, user, {
       excludeExtraneousValues: true,
