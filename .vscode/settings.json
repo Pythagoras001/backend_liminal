@@ -1,0 +1,34 @@
+{
+  // --- Oxlint (extensión oxc.oxc-vscode) ---
+  "oxc.enable": true,
+  "oxc.configPath": "oxlint.json",
+  // Recalcula los diagnósticos al guardar (usa "onType" si los quieres en vivo)
+  "oxc.lint.run": "onSave",
+
+  // --- Acciones al guardar ---
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    // Aplica los fixes automáticos de oxlint al guardar
+    "source.fixAll.oxc": "always"
+  },
+
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+
+  // El proyecto no usa ESLint (usa oxlint), evita diagnósticos duplicados/errores
+  "eslint.enable": false,
+
+  "files.eol": "\n",
+  "typescript.tsdk": "node_modules/typescript/lib"
+}
