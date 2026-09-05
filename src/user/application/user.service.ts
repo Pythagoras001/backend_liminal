@@ -3,13 +3,11 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { plainToInstance } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { User } from '../domain/User';
 import { UserRepositoryAdapter } from '../infraestructure/adapter/out/persistence/user.respository.adapter';
 import { UserAlreadyExistsError } from '../infraestructure/adapter/out/persistence/exception/user-already-exists.error';
 import { CreateUserDto } from '../infraestructure/adapter/dto/request/create-user.dto';
-import { ResponseUserDto } from '../infraestructure/adapter/dto/response/response-user.dto';
 import { UpdateUserDto } from '../infraestructure/adapter/dto/request/update-user.dto';
 
 const SALT_ROUNDS = 10;
@@ -18,7 +16,7 @@ const SALT_ROUNDS = 10;
 export class UserService {
   constructor(private readonly userRepositoryAdapter: UserRepositoryAdapter) {}
 
-  async create(createUserDto: CreateUserDto): Promise<ResponseUserDto> {
+  async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(
       createUserDto.password,
       SALT_ROUNDS,
@@ -33,11 +31,7 @@ export class UserService {
     );
 
     try {
-      const createdUser = await this.userRepositoryAdapter.create(user);
-
-      return plainToInstance(ResponseUserDto, createdUser, {
-        excludeExtraneousValues: true,
-      });
+      return await this.userRepositoryAdapter.create(user);
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
         throw new ConflictException(error.message);
@@ -47,11 +41,8 @@ export class UserService {
     }
   }
 
-  async update(
-    id: string,
-    updateUserDto: UpdateUserDto,
-  ): Promise<ResponseUserDto> {
-    const user = await this.userRepositoryAdapter.findOne(id);
+  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+    const user = await this.userRepositoryAdapter.findById(id);
 
     if (!user) {
       throw new NotFoundException(`User with id ${id} not found`);
@@ -66,11 +57,7 @@ export class UserService {
     }
 
     try {
-      const updatedUser = await this.userRepositoryAdapter.update(user);
-
-      return plainToInstance(ResponseUserDto, updatedUser, {
-        excludeExtraneousValues: true,
-      });
+      return await this.userRepositoryAdapter.update(user);
     } catch (error) {
       if (error instanceof UserAlreadyExistsError) {
         throw new ConflictException(error.message);

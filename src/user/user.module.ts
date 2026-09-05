@@ -13,5 +13,6 @@ import { PrismaService } from '../prisma/prisma.service';
     UserRepositoryAdapter,
     PrismaService,
   ],
+  exports: [UserQueryService],
 })
 export class UserModule {}

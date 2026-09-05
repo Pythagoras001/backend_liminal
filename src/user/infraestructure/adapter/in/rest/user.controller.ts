@@ -1,9 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import { plainToInstance } from 'class-transformer';
 import { UserService } from '../../../../application/user.service';
 import { CreateUserDto } from '../../dto/request/create-user.dto';
 import { UpdateUserDto } from '../../dto/request/update-user.dto';
 import { ResponseUserDto } from '../../dto/response/response-user.dto';
 import { UserQueryService } from '../../../../application/user.query.service';
+import { Public } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/public-access.decorator';
 
 @Controller('user')
 export class UserController {
@@ -12,21 +14,34 @@ export class UserController {
     private readonly userQueryService: UserQueryService,
   ) {}
 
+  @Public()
   @Post()
-  create(@Body() createUserDto: CreateUserDto): Promise<ResponseUserDto> {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<ResponseUserDto> {
+    const user = await this.userService.create(createUserDto);
+
+    return plainToInstance(ResponseUserDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ResponseUserDto> {
-    return this.userQueryService.findOne(id);
+  async findById(@Param('id') id: string): Promise<ResponseUserDto> {
+    const user = await this.userQueryService.findById(id);
+
+    return plainToInstance(ResponseUserDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ): Promise<ResponseUserDto> {
-    return this.userService.update(id, updateUserDto);
+    const user = await this.userService.update(id, updateUserDto);
+
+    return plainToInstance(ResponseUserDto, user, {
+      excludeExtraneousValues: true,
+    });
   }
 }

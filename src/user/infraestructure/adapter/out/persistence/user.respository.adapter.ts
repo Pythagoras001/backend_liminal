@@ -28,9 +28,21 @@ export class UserRepositoryAdapter {
     }
   }
 
-  async findOne(id: string): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
     const userPersist = await this.prisma.userPersist.findUnique({
       where: { id },
+    });
+
+    if (!userPersist) {
+      return null;
+    }
+
+    return UserMapper.toDomain(userPersist);
+  }
+
+  async findByEmail(email: string): Promise<User | null> {
+    const userPersist = await this.prisma.userPersist.findUnique({
+      where: { email },
     });
 
     if (!userPersist) {
