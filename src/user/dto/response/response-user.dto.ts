@@ -1,4 +1,8 @@
+import { Expose } from 'class-transformer';
+
 export class ResponseUserDto {
-  userName: string;
-  email: string;
+  @Expose() id: string;
+  @Expose() userName: string;
+  @Expose() email: string;
+  @Expose() createdAt: Date;
 }
