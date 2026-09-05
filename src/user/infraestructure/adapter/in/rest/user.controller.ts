@@ -26,8 +26,8 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.userQueryService.findOne(+id);
+  findOne(@Param('id') id: string): Promise<ResponseUserDto> {
+    return this.userQueryService.findOne(id);
   }
 
   @Patch(':id')
