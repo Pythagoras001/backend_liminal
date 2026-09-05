@@ -39,4 +39,30 @@ export class UserRepositoryAdapter {
 
     return UserMapper.toDomain(userPersist);
   }
+
+  async update(user: User): Promise<User> {
+    const id = user.getId();
+
+    if (!id) {
+      throw new Error('Cannot update a user without an id');
+    }
+
+    try {
+      const userPersist = await this.prisma.userPersist.update({
+        where: { id },
+        data: UserMapper.toUpdateData(user),
+      });
+
+      return UserMapper.toDomain(userPersist);
+    } catch (error) {
+      if (
+        error instanceof Prisma.PrismaClientKnownRequestError &&
+        error.code === 'P2002'
+      ) {
+        throw new UserAlreadyExistsError('userName or email already in use');
+      }
+
+      throw error;
+    }
+  }
 }

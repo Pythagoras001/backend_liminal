@@ -21,4 +21,11 @@ export class UserMapper {
       createdAt: user.getCreatedAt(),
     };
   }
+
+  static toUpdateData(user: User): Prisma.UserPersistUpdateInput {
+    return {
+      userName: user.getUserName(),
+      email: user.getEmail(),
+    };
+  }
 }

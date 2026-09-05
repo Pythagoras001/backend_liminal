@@ -1,4 +1,8 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { plainToInstance } from 'class-transformer';
 import * as bcrypt from 'bcrypt';
 import { User } from '../domain/User';
@@ -43,7 +47,36 @@ export class UserService {
     }
   }
 
-  update(id: string, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+  ): Promise<ResponseUserDto> {
+    const user = await this.userRepositoryAdapter.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException(`User with id ${id} not found`);
+    }
+
+    if (updateUserDto.userName) {
+      user.changeUserName(updateUserDto.userName);
+    }
+
+    if (updateUserDto.email) {
+      user.changeEmail(updateUserDto.email);
+    }
+
+    try {
+      const updatedUser = await this.userRepositoryAdapter.update(user);
+
+      return plainToInstance(ResponseUserDto, updatedUser, {
+        excludeExtraneousValues: true,
+      });
+    } catch (error) {
+      if (error instanceof UserAlreadyExistsError) {
+        throw new ConflictException(error.message);
+      }
+
+      throw error;
+    }
   }
 }
