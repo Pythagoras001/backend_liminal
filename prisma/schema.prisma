@@ -13,13 +13,15 @@ datasource db {
 }
 
 model UserPersist {
-  id             String        @id @default(uuid())
-  userName       String        @unique
-  email          String        @unique
+  id             String              @id @default(uuid())
+  userName       String              @unique
+  email          String              @unique
   password       String
-  createdAt      DateTime      @default(now())
-  profileImageId String?       @unique
-  profileImage   ImagePersist? @relation(fields: [profileImageId], references: [id], onDelete: SetNull)
+  createdAt      DateTime            @default(now())
+  profileImageId String?             @unique
+  profileImage   ImagePersist?       @relation(fields: [profileImageId], references: [id], onDelete: SetNull)
+  reports        ReportPersist[]
+  reportLikes    ReportLikePersist[]
 }
 
 model ImagePersist {
@@ -31,16 +33,54 @@ model ImagePersist {
   createdAt    DateTime              @default(now())
   user         UserPersist?
   levelClass   SurvivalClassPersist?
+  evidence     EvidencePersist?
 }
 
 model SurvivalClassPersist {
-  id            Int          @id @default(autoincrement())
+  id            Int             @id @default(autoincrement())
   type          String
   classNumber   String?
   securityLevel String
   legitimacy    String
   dangerLevel   String
-  iconImageId   String       @unique
-  iconImage     ImagePersist @relation(fields: [iconImageId], references: [id], onDelete: Restrict)
+  iconImageId   String          @unique
+  iconImage     ImagePersist    @relation(fields: [iconImageId], references: [id], onDelete: Restrict)
   description   String
+  reports       ReportPersist[]
+}
+
+model ReportPersist {
+  id                  Int                 @id @default(autoincrement())
+  authorId            String
+  author              UserPersist         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  title               String
+  nivel               String
+  levelClassId        Int
+  levelClass          SurvivalClassPersist @relation(fields: [levelClassId], references: [id], onDelete: Restrict)
+  description         String
+  createdAt           DateTime            @default(now())
+  principalEvidenceId String              @unique
+  principalEvidence   EvidencePersist     @relation("ReportPrincipalEvidence", fields: [principalEvidenceId], references: [id], onDelete: Restrict)
+  galeryEvidences     EvidencePersist[]   @relation("ReportGaleryEvidences")
+  likes               ReportLikePersist[]
+}
+
+model EvidencePersist {
+  id                String         @id @default(uuid())
+  description       String
+  imageId           String         @unique
+  image             ImagePersist   @relation(fields: [imageId], references: [id], onDelete: Restrict)
+  principalOfReport ReportPersist? @relation("ReportPrincipalEvidence")
+  galeryReportId    Int?
+  galeryReport      ReportPersist? @relation("ReportGaleryEvidences", fields: [galeryReportId], references: [id], onDelete: Cascade)
+}
+
+model ReportLikePersist {
+  userId    String
+  reportId  Int
+  createdAt DateTime      @default(now())
+  user      UserPersist   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  report    ReportPersist @relation(fields: [reportId], references: [id], onDelete: Cascade)
+
+  @@id([userId, reportId])
 }
