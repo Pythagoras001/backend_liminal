@@ -25,9 +25,5 @@ export class CreateLevelClassDto {
 
   @IsString()
   @IsNotEmpty()
-  iconUrl: string;
-
-  @IsString()
-  @IsNotEmpty()
   description: string;
 }

@@ -1,3 +1,4 @@
+import { Image } from '../../image/domain/Image';
 import { Legitimacy, SurvivalClassType } from './enums/survival-class.enum';
 
 export class SurvivalClassEntity {
@@ -8,7 +9,7 @@ export class SurvivalClassEntity {
     private securityLevel: string,
     private legitimacy: Legitimacy,
     private dangerLevel: string,
-    private iconUrl: string,
+    private iconImage: Image,
     private description: string,
   ) {}
 
@@ -36,8 +37,8 @@ export class SurvivalClassEntity {
     return this.dangerLevel;
   }
 
-  getIconUrl(): string {
-    return this.iconUrl;
+  getIconImage(): Image {
+    return this.iconImage;
   }
 
   getDescription(): string {
@@ -64,8 +65,8 @@ export class SurvivalClassEntity {
     this.dangerLevel = newDangerLevel;
   }
 
-  changeIconUrl(newIconUrl: string): void {
-    this.iconUrl = newIconUrl;
+  changeIconImage(newIconImage: Image): void {
+    this.iconImage = newIconImage;
   }
 
   changeDescription(newDescription: string): void {

@@ -1,15 +1,23 @@
 import {
+  ImagePersist,
   Prisma,
   SurvivalClassPersist,
 } from '../../../../../generated/prisma/client';
+import { ImageMapper } from '../../../../../image/infraestructure/adapter/out/persistence/image.mapper';
 import { SurvivalClassEntity } from '../../../../domain/LevelClass';
 import {
   Legitimacy,
   SurvivalClassType,
 } from '../../../../domain/enums/survival-class.enum';
 
+type SurvivalClassPersistWithIconImage = SurvivalClassPersist & {
+  iconImage: ImagePersist;
+};
+
 export class LevelClassMapper {
-  static toDomain(persist: SurvivalClassPersist): SurvivalClassEntity {
+  static toDomain(
+    persist: SurvivalClassPersistWithIconImage,
+  ): SurvivalClassEntity {
     return new SurvivalClassEntity(
       persist.id,
       persist.type as SurvivalClassType,
@@ -17,7 +25,7 @@ export class LevelClassMapper {
       persist.securityLevel,
       persist.legitimacy as Legitimacy,
       persist.dangerLevel,
-      persist.iconUrl,
+      ImageMapper.toDomain(persist.iconImage),
       persist.description,
     );
   }
@@ -31,7 +39,7 @@ export class LevelClassMapper {
       securityLevel: entity.getSecurityLevel(),
       legitimacy: entity.getLegitimacy(),
       dangerLevel: entity.getDangerLevel(),
-      iconUrl: entity.getIconUrl(),
+      iconImage: { connect: { id: entity.getIconImage().getId() } },
       description: entity.getDescription(),
     };
   }
@@ -45,7 +53,7 @@ export class LevelClassMapper {
       securityLevel: entity.getSecurityLevel(),
       legitimacy: entity.getLegitimacy(),
       dangerLevel: entity.getDangerLevel(),
-      iconUrl: entity.getIconUrl(),
+      iconImage: { connect: { id: entity.getIconImage().getId() } },
       description: entity.getDescription(),
     };
   }

@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ImageService } from '../../image/application/image.service';
 import { SurvivalClassEntity } from '../domain/LevelClass';
 import { CreateLevelClassDto } from '../infraestructure/adapter/in/rest/dto/request/create-level-class.dto';
 import { UpdateLevelClassDto } from '../infraestructure/adapter/in/rest/dto/request/update-level-class.dto';
@@ -8,9 +9,15 @@ import { LevelClassRepositoryAdapter } from '../infraestructure/adapter/out/pers
 export class LevelClassService {
   constructor(
     private readonly levelClassRepositoryAdapter: LevelClassRepositoryAdapter,
+    private readonly imageService: ImageService,
   ) {}
 
-  async create(dto: CreateLevelClassDto): Promise<SurvivalClassEntity> {
+  async create(
+    dto: CreateLevelClassDto,
+    iconBuffer: Buffer,
+  ): Promise<SurvivalClassEntity> {
+    const iconImage = await this.imageService.upload(iconBuffer);
+
     const entity = new SurvivalClassEntity(
       undefined,
       dto.type,
@@ -18,7 +25,7 @@ export class LevelClassService {
       dto.securityLevel,
       dto.legitimacy,
       dto.dangerLevel,
-      dto.iconUrl,
+      iconImage,
       dto.description,
     );
 
@@ -28,6 +35,7 @@ export class LevelClassService {
   async update(
     id: number,
     dto: UpdateLevelClassDto,
+    iconBuffer?: Buffer,
   ): Promise<SurvivalClassEntity> {
     const entity = await this.levelClassRepositoryAdapter.findById(id);
 
@@ -55,12 +63,19 @@ export class LevelClassService {
       entity.changeDangerLevel(dto.dangerLevel);
     }
 
-    if (dto.iconUrl) {
-      entity.changeIconUrl(dto.iconUrl);
-    }
-
     if (dto.description) {
       entity.changeDescription(dto.description);
+    }
+
+    if (iconBuffer) {
+      const previousIconImage = entity.getIconImage();
+      const newIconImage = await this.imageService.upload(iconBuffer);
+      entity.changeIconImage(newIconImage);
+
+      const updated = await this.levelClassRepositoryAdapter.update(entity);
+      await this.imageService.delete(previousIconImage.getId()!);
+
+      return updated;
     }
 
     return this.levelClassRepositoryAdapter.update(entity);

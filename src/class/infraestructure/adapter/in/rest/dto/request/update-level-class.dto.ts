@@ -27,9 +27,5 @@ export class UpdateLevelClassDto {
 
   @IsOptional()
   @IsString()
-  iconUrl?: string;
-
-  @IsOptional()
-  @IsString()
   description?: string;
 }

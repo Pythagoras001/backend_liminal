@@ -23,22 +23,24 @@ model UserPersist {
 }
 
 model ImagePersist {
-  id           String       @id @default(uuid())
-  publicId     String       @unique
+  id           String                @id @default(uuid())
+  publicId     String                @unique
   originalUrl  String
   thumbnailUrl String
   mediumUrl    String
-  createdAt    DateTime     @default(now())
+  createdAt    DateTime              @default(now())
   user         UserPersist?
+  levelClass   SurvivalClassPersist?
 }
 
 model SurvivalClassPersist {
-  id            Int     @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   type          String
   classNumber   String?
   securityLevel String
   legitimacy    String
   dangerLevel   String
-  iconUrl       String
+  iconImageId   String       @unique
+  iconImage     ImagePersist @relation(fields: [iconImageId], references: [id], onDelete: Restrict)
   description   String
 }

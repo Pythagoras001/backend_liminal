@@ -1,4 +1,5 @@
-import { Expose } from 'class-transformer';
+import { Expose, Transform } from 'class-transformer';
+import { SurvivalClassEntity } from '../../../../../../domain/LevelClass';
 import {
   Legitimacy,
   SurvivalClassType,
@@ -11,6 +12,21 @@ export class ResponseLevelClassDto {
   @Expose() securityLevel: string;
   @Expose() legitimacy: Legitimacy;
   @Expose() dangerLevel: string;
-  @Expose() iconUrl: string;
   @Expose() description: string;
+
+  @Expose()
+  @Transform(({ obj }: { obj: SurvivalClassEntity }) => {
+    const iconImage = obj.getIconImage();
+
+    return {
+      thumbnailUrl: iconImage.getThumbnailUrl(),
+      mediumUrl: iconImage.getMediumUrl(),
+      originalUrl: iconImage.getOriginalUrl(),
+    };
+  })
+  iconImage: {
+    thumbnailUrl: string;
+    mediumUrl: string;
+    originalUrl: string;
+  };
 }
