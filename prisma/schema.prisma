@@ -31,3 +31,14 @@ model ImagePersist {
   createdAt    DateTime     @default(now())
   user         UserPersist?
 }
+
+model SurvivalClassPersist {
+  id            Int     @id @default(autoincrement())
+  type          String
+  classNumber   String?
+  securityLevel String
+  legitimacy    String
+  dangerLevel   String
+  iconUrl       String
+  description   String
+}
