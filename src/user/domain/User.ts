@@ -1,3 +1,5 @@
+import { Image } from '../../image/domain/Image';
+
 const USER_NAME_PATTERN = /^[a-zA-Z0-9_]{3,20}$/;
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const EMAIL_MAX_LENGTH = 255;
@@ -9,6 +11,7 @@ export class User {
     private email: string,
     private readonly password: string,
     private readonly createdAt: Date,
+    private profileImage: Image | undefined = undefined,
   ) {}
 
   getId(): string | undefined {
@@ -29,6 +32,14 @@ export class User {
 
   getCreatedAt(): Date {
     return this.createdAt;
+  }
+
+  getProfileImage(): Image | undefined {
+    return this.profileImage;
+  }
+
+  changeProfileImage(newProfileImage: Image): void {
+    this.profileImage = newProfileImage;
   }
 
   changeUserName(newUserName: string): void {

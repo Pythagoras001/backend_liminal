@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ImageService } from '../../image/application/image.service';
 import { User } from '../domain/User';
 import { UserRepositoryAdapter } from '../infraestructure/adapter/out/persistence/user.respository.adapter';
 import { UserAlreadyExistsError } from '../infraestructure/adapter/out/persistence/exception/user-already-exists.error';
@@ -14,7 +15,10 @@ const SALT_ROUNDS = 10;
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepositoryAdapter: UserRepositoryAdapter) {}
+  constructor(
+    private readonly userRepositoryAdapter: UserRepositoryAdapter,
+    private readonly imageService: ImageService,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const hashedPassword = await bcrypt.hash(
@@ -41,7 +45,11 @@ export class UserService {
     }
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(
+    id: string,
+    updateUserDto: UpdateUserDto,
+    avatarBuffer?: Buffer,
+  ): Promise<User> {
     const user = await this.userRepositoryAdapter.findById(id);
 
     if (!user) {
@@ -54,6 +62,16 @@ export class UserService {
 
     if (updateUserDto.email) {
       user.changeEmail(updateUserDto.email);
+    }
+
+    if (avatarBuffer) {
+      const previousProfileImage = user.getProfileImage();
+      const profileImage = await this.imageService.upload(avatarBuffer);
+      user.changeProfileImage(profileImage);
+
+      if (previousProfileImage) {
+        await this.imageService.delete(previousProfileImage.getId()!);
+      }
     }
 
     try {

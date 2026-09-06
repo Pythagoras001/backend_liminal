@@ -1,4 +1,14 @@
-import { Controller, Get, Post, Body, Patch, Param } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  UseInterceptors,
+  UploadedFile,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import { plainToInstance } from 'class-transformer';
 import { UserService } from '../../../../application/user.service';
 import { CreateUserDto } from '../../dto/request/create-user.dto';
@@ -38,11 +48,17 @@ export class UserController {
   }
 
   @Patch('update')
+  @UseInterceptors(FileInterceptor('avatar'))
   async update(
     @CurrentUser() currentUser: JwtPayload,
     @Body() updateUserDto: UpdateUserDto,
+    @UploadedFile() avatar?: Express.Multer.File,
   ): Promise<ResponseUserDto> {
-    const user = await this.userService.update(currentUser.sub, updateUserDto);
+    const user = await this.userService.update(
+      currentUser.sub,
+      updateUserDto,
+      avatar?.buffer,
+    );
 
     return plainToInstance(ResponseUserDto, user, {
       excludeExtraneousValues: true,

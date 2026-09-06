@@ -13,6 +13,7 @@ export class UserRepositoryAdapter {
     try {
       const userPersist = await this.prisma.userPersist.create({
         data: UserMapper.toPersist(user),
+        include: { profileImage: true },
       });
 
       return UserMapper.toDomain(userPersist);
@@ -31,6 +32,7 @@ export class UserRepositoryAdapter {
   async findById(id: string): Promise<User | null> {
     const userPersist = await this.prisma.userPersist.findUnique({
       where: { id },
+      include: { profileImage: true },
     });
 
     if (!userPersist) {
@@ -43,6 +45,7 @@ export class UserRepositoryAdapter {
   async findByEmail(email: string): Promise<User | null> {
     const userPersist = await this.prisma.userPersist.findUnique({
       where: { email },
+      include: { profileImage: true },
     });
 
     if (!userPersist) {
@@ -63,6 +66,7 @@ export class UserRepositoryAdapter {
       const userPersist = await this.prisma.userPersist.update({
         where: { id },
         data: UserMapper.toUpdateData(user),
+        include: { profileImage: true },
       });
 
       return UserMapper.toDomain(userPersist);
