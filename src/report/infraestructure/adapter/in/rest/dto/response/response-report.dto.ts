@@ -2,7 +2,7 @@ import { Expose, Transform } from 'class-transformer';
 import { Evidence } from '../../../../../../domain/Evidence';
 import { Report } from '../../../../../../domain/Report';
 
-type EvidenceResponse = {
+export type EvidenceResponse = {
   description: string;
   image: {
     thumbnailUrl: string;
@@ -11,7 +11,7 @@ type EvidenceResponse = {
   };
 };
 
-function mapEvidence(evidence: Evidence): EvidenceResponse {
+export function mapEvidence(evidence: Evidence): EvidenceResponse {
   const image = evidence.getEvidence();
 
   return {

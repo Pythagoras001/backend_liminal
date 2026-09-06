@@ -16,6 +16,14 @@ export class LevelClassRepositoryAdapter {
     return LevelClassMapper.toDomain(persist);
   }
 
+  async findAll(): Promise<SurvivalClassEntity[]> {
+    const persists = await this.prisma.survivalClassPersist.findMany({
+      include: { iconImage: true },
+    });
+
+    return persists.map((persist) => LevelClassMapper.toDomain(persist));
+  }
+
   async findById(id: number): Promise<SurvivalClassEntity | null> {
     const persist = await this.prisma.survivalClassPersist.findUnique({
       where: { id },

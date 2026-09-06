@@ -21,4 +21,12 @@ export class ReportRepositoryAdapter {
 
     return ReportMapper.toDomain(persist);
   }
+
+  async findAll(): Promise<Report[]> {
+    const persists = await this.prisma.reportPersist.findMany({
+      include: reportInclude,
+    });
+
+    return persists.map((persist) => ReportMapper.toDomain(persist));
+  }
 }

@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Get,
   Post,
   UploadedFiles,
   UseInterceptors,
@@ -9,10 +10,13 @@ import {
 import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { plainToInstance } from 'class-transformer';
 import { ReportService } from '../../../../application/report.service';
+import { ReportQueryService } from '../../../../application/report.query.service';
 import { CurrentUser } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/current-user.decorator';
 import type { JwtPayload } from '../../../../../auth/infraestructure/security/jwt-payload.interface';
 import { CreateReportDto } from './dto/request/create-report.dto';
 import { ResponseReportDto } from './dto/response/response-report.dto';
+import { ResponseReportDetailDto } from './dto/response/response-report-detail.dto';
+import { Public } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/public-access.decorator';
 
 type CreateReportFiles = {
   principalEvidence?: Express.Multer.File[];
@@ -21,7 +25,20 @@ type CreateReportFiles = {
 
 @Controller('report')
 export class ReportController {
-  constructor(private readonly reportService: ReportService) {}
+  constructor(
+    private readonly reportService: ReportService,
+    private readonly reportQueryService: ReportQueryService,
+  ) {}
+
+  @Public()
+  @Get()
+  async findAll(): Promise<ResponseReportDetailDto[]> {
+    const reports = await this.reportQueryService.findAll();
+
+    return plainToInstance(ResponseReportDetailDto, reports, {
+      excludeExtraneousValues: true,
+    });
+  }
 
   @Post()
   @UseInterceptors(

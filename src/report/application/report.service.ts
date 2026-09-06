@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { ImageService } from '../../image/application/image.service';
+import { LevelClassRepositoryAdapter } from '../../level-class/infraestructure/adapter/out/persistence/level-class.repository.adapter';
 import { Evidence } from '../domain/Evidence';
 import { Report } from '../domain/Report';
 import { CreateReportDto } from '../infraestructure/adapter/in/rest/dto/request/create-report.dto';
@@ -10,6 +11,7 @@ export class ReportService {
   constructor(
     private readonly reportRepositoryAdapter: ReportRepositoryAdapter,
     private readonly imageService: ImageService,
+    private readonly levelClassRepositoryAdapter: LevelClassRepositoryAdapter,
   ) {}
 
   async create(
@@ -18,6 +20,16 @@ export class ReportService {
     principalEvidenceBuffer: Buffer,
     galeryEvidencesBuffers: Buffer[] = [],
   ): Promise<Report> {
+    const levelClass = await this.levelClassRepositoryAdapter.findById(
+      dto.levelClassId,
+    );
+
+    if (!levelClass) {
+      throw new NotFoundException(
+        `Level class with id ${dto.levelClassId} not found`,
+      );
+    }
+
     const galeryEvidencesDescriptions = dto.galeryEvidencesDescriptions ?? [];
 
     if (galeryEvidencesDescriptions.length !== galeryEvidencesBuffers.length) {
