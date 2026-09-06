@@ -19,3 +19,12 @@ model UserPersist {
   password  String
   createdAt DateTime @default(now())
 }
+
+model ImagePersist {
+  id           String   @id @default(uuid())
+  publicId     String   @unique
+  originalUrl  String
+  thumbnailUrl String
+  mediumUrl    String
+  createdAt    DateTime @default(now())
+}
