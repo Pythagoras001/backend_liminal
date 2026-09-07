@@ -33,6 +33,15 @@ export class ReportRepositoryAdapter {
     return persists.map((persist) => ReportMapper.toDomain(persist));
   }
 
+  async findById(id: number): Promise<Report | null> {
+    const persist = await this.prisma.reportPersist.findUnique({
+      where: { id },
+      include: reportInclude,
+    });
+
+    return persist ? ReportMapper.toDomain(persist) : null;
+  }
+
   async count(): Promise<number> {
     return this.prisma.reportPersist.count();
   }

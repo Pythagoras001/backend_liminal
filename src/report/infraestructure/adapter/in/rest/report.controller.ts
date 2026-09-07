@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
   UploadedFiles,
@@ -49,6 +51,18 @@ export class ReportController {
       total: result.total,
       totalPages: result.totalPages,
     };
+  }
+
+  @Public()
+  @Get(':id')
+  async findById(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ResponseReportDetailDto> {
+    const report = await this.reportQueryService.findById(id);
+
+    return plainToInstance(ResponseReportDetailDto, report, {
+      excludeExtraneousValues: true,
+    });
   }
 
   @Post()

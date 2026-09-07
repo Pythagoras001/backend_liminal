@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { LevelClassQueryService } from '../../level-class/application/level-class.query.service';
 import { UserQueryService } from '../../user/application/user.query.service';
 import { ReportRepositoryAdapter } from '../infraestructure/adapter/out/report.repository.adapter';
@@ -55,7 +55,29 @@ export class ReportQueryService {
     };
   }
 
+  async findById(id: number): Promise<ReportDetailReadModel> {
+    const report = await this.reportRepositoryAdapter.findById(id);
 
+    if (!report) {
+      throw new NotFoundException(`Report with id ${id} not found`);
+    }
 
+    const [author, levelClass] = await Promise.all([
+      this.userQueryService.findById(report.getAuthorId()),
+      this.levelClassQueryService.findById(report.getLevelClassId()),
+    ]);
 
+    return new ReportDetailReadModel(
+      report.getId(),
+      report.getTitle(),
+      report.getNivel(),
+      report.getDescription(),
+      report.getCreatedAt(),
+      report.getPrincipalEvidence(),
+      report.getGaleryEvidences(),
+      report.getLikesCount(),
+      author,
+      levelClass,
+    );
+  }
 }
