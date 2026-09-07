@@ -22,11 +22,18 @@ export class ReportRepositoryAdapter {
     return ReportMapper.toDomain(persist);
   }
 
-  async findAll(): Promise<Report[]> {
+  async findAll(skip: number, take: number): Promise<Report[]> {
     const persists = await this.prisma.reportPersist.findMany({
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
       include: reportInclude,
     });
 
     return persists.map((persist) => ReportMapper.toDomain(persist));
+  }
+
+  async count(): Promise<number> {
+    return this.prisma.reportPersist.count();
   }
 }

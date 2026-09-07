@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { LevelClassQueryService } from '../../level-class/application/level-class.query.service';
 import { UserQueryService } from '../../user/application/user.query.service';
 import { ReportRepositoryAdapter } from '../infraestructure/adapter/out/report.repository.adapter';
+import { PaginatedResult } from './read-model/paginated-result';
 import { ReportDetailReadModel } from './read-model/report-detail.readmodel';
+
+const REPORTS_PAGE_SIZE = 10;
 
 @Injectable()
 export class ReportQueryService {
@@ -12,10 +15,16 @@ export class ReportQueryService {
     private readonly levelClassQueryService: LevelClassQueryService,
   ) {}
 
-  async findAll(): Promise<ReportDetailReadModel[]> {
-    const reports = await this.reportRepositoryAdapter.findAll();
+  async findAll(page = 1): Promise<PaginatedResult<ReportDetailReadModel>> {
+    const currentPage = page < 1 ? 1 : page;
+    const skip = (currentPage - 1) * REPORTS_PAGE_SIZE;
 
-    return Promise.all(
+    const [reports, total] = await Promise.all([
+      this.reportRepositoryAdapter.findAll(skip, REPORTS_PAGE_SIZE),
+      this.reportRepositoryAdapter.count(),
+    ]);
+
+    const data = await Promise.all(
       reports.map(async (report) => {
         const [author, levelClass] = await Promise.all([
           this.userQueryService.findById(report.getAuthorId()),
@@ -36,5 +45,17 @@ export class ReportQueryService {
         );
       }),
     );
+
+    return {
+      data,
+      page: currentPage,
+      pageSize: REPORTS_PAGE_SIZE,
+      total,
+      totalPages: Math.ceil(total / REPORTS_PAGE_SIZE),
+    };
   }
+
+
+
+
 }

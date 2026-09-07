@@ -36,6 +36,7 @@ export class LevelClassController {
     });
   }
 
+  @Public()
   @Post()
   @UseInterceptors(FileInterceptor('icon'))
   async create(

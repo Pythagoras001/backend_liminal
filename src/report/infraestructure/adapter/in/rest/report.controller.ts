@@ -4,6 +4,7 @@ import {
   Controller,
   Get,
   Post,
+  Query,
   UploadedFiles,
   UseInterceptors,
 } from '@nestjs/common';
@@ -14,8 +15,10 @@ import { ReportQueryService } from '../../../../application/report.query.service
 import { CurrentUser } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/current-user.decorator';
 import type { JwtPayload } from '../../../../../auth/infraestructure/security/jwt-payload.interface';
 import { CreateReportDto } from './dto/request/create-report.dto';
+import { FindAllReportsQueryDto } from './dto/request/find-all-reports.query.dto';
 import { ResponseReportDto } from './dto/response/response-report.dto';
 import { ResponseReportDetailDto } from './dto/response/response-report-detail.dto';
+import type { PaginatedResponseDto } from './dto/response/paginated-response.dto';
 import { Public } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/public-access.decorator';
 
 type CreateReportFiles = {
@@ -32,12 +35,20 @@ export class ReportController {
 
   @Public()
   @Get()
-  async findAll(): Promise<ResponseReportDetailDto[]> {
-    const reports = await this.reportQueryService.findAll();
+  async findAll(
+    @Query() query: FindAllReportsQueryDto,
+  ): Promise<PaginatedResponseDto<ResponseReportDetailDto>> {
+    const result = await this.reportQueryService.findAll(query.page);
 
-    return plainToInstance(ResponseReportDetailDto, reports, {
-      excludeExtraneousValues: true,
-    });
+    return {
+      data: plainToInstance(ResponseReportDetailDto, result.data, {
+        excludeExtraneousValues: true,
+      }),
+      page: result.page,
+      pageSize: result.pageSize,
+      total: result.total,
+      totalPages: result.totalPages,
+    };
   }
 
   @Post()
