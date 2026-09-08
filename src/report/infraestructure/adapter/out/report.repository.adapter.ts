@@ -42,7 +42,27 @@ export class ReportRepositoryAdapter {
     return persist ? ReportMapper.toDomain(persist) : null;
   }
 
+  async findByAuthor(
+    authorId: string,
+    skip: number,
+    take: number,
+  ): Promise<Report[]> {
+    const persists = await this.prisma.reportPersist.findMany({
+      where: { authorId },
+      skip,
+      take,
+      orderBy: { createdAt: 'desc' },
+      include: reportInclude,
+    });
+
+    return persists.map((persist) => ReportMapper.toDomain(persist));
+  }
+
   async count(): Promise<number> {
     return this.prisma.reportPersist.count();
+  }
+
+  async countByAuthor(authorId: string): Promise<number> {
+    return this.prisma.reportPersist.count({ where: { authorId } });
   }
 }

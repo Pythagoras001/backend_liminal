@@ -53,6 +53,28 @@ export class ReportController {
     };
   }
 
+  @Get('me')
+  async findByAuthor(
+    @CurrentUser() currentUser: JwtPayload,
+    @Query() query: FindAllReportsQueryDto,
+  ): Promise<PaginatedResponseDto<ResponseReportDetailDto>> {
+    const result = await this.reportQueryService.findByAuthor(
+      currentUser.sub,
+      query.page,
+    );
+
+    return {
+      data: plainToInstance(ResponseReportDetailDto, result.data, {
+        excludeExtraneousValues: true,
+      }),
+      page: result.page,
+      pageSize: result.pageSize,
+      total: result.total,
+      totalPages: result.totalPages,
+    };
+  }
+
+
   @Public()
   @Get(':id')
   async findById(
@@ -96,4 +118,8 @@ export class ReportController {
       excludeExtraneousValues: true,
     });
   }
+
+  
+
+
 }
