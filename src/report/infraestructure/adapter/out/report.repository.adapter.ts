@@ -65,4 +65,45 @@ export class ReportRepositoryAdapter {
   async countByAuthor(authorId: string): Promise<number> {
     return this.prisma.reportPersist.count({ where: { authorId } });
   }
+
+  async delete(id: number): Promise<void> {
+    await this.prisma.reportPersist.delete({ where: { id } });
+  }
+
+  async update(entity: Report): Promise<Report> {
+    const id = entity.getId()!;
+
+    const existingLikes = await this.prisma.reportLikePersist.findMany({
+      where: { reportId: id },
+    });
+    const currentLikes = entity.getLikes();
+
+    const existingUserIds = new Set(existingLikes.map((like) => like.userId));
+    const currentUserIds = new Set(currentLikes.map((like) => like.getUserId()));
+
+    const likesToCreate = currentLikes.filter(
+      (like) => !existingUserIds.has(like.getUserId()),
+    );
+    const userIdsToDelete = existingLikes
+      .filter((like) => !currentUserIds.has(like.userId))
+      .map((like) => like.userId);
+
+    const persist = await this.prisma.reportPersist.update({
+      where: { id },
+      data: {
+        likes: {
+          create: likesToCreate.map((like) => ({
+            userId: like.getUserId(),
+            createdAt: like.getCreatedAt(),
+          })),
+          deleteMany: userIdsToDelete.length
+            ? [{ userId: { in: userIdsToDelete } }]
+            : undefined,
+        },
+      },
+      include: reportInclude,
+    });
+
+    return ReportMapper.toDomain(persist);
+  }
 }

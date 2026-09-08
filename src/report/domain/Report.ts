@@ -97,4 +97,17 @@ export class Report {
 
         this.likes.push(new ReportLike(userId, this.id, new Date()));
     }
+
+    rate(userId: string, liked: boolean): void {
+        const hasLike = this.hasLikeFrom(userId);
+
+        if (liked && !hasLike) {
+            this.likes.push(new ReportLike(userId, this.id, new Date()));
+            return;
+        }
+
+        if (!liked && hasLike) {
+            this.likes = this.likes.filter((like) => like.getUserId() !== userId);
+        }
+    }
 }

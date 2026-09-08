@@ -2,9 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   UploadedFiles,
@@ -17,6 +21,7 @@ import { ReportQueryService } from '../../../../application/report.query.service
 import { CurrentUser } from '../../../../../auth/infraestructure/adapter/in/rest/decorator/current-user.decorator';
 import type { JwtPayload } from '../../../../../auth/infraestructure/security/jwt-payload.interface';
 import { CreateReportDto } from './dto/request/create-report.dto';
+import { RateReportDto } from './dto/request/rate-report.dto';
 import { FindAllReportsQueryDto } from './dto/request/find-all-reports.query.dto';
 import { ResponseReportDto } from './dto/response/response-report.dto';
 import { ResponseReportDetailDto } from './dto/response/response-report-detail.dto';
@@ -74,7 +79,6 @@ export class ReportController {
     };
   }
 
-
   @Public()
   @Get(':id')
   async findById(
@@ -119,7 +123,28 @@ export class ReportController {
     });
   }
 
-  
+  @Patch()
+  async rate(
+    @CurrentUser() currentUser: JwtPayload,
+    @Body() rateReportDto: RateReportDto,
+  ): Promise<ResponseReportDto> {
+    const report = await this.reportService.rate(
+      rateReportDto.reportId,
+      currentUser.sub,
+      rateReportDto.liked,
+    );
 
+    return plainToInstance(ResponseReportDto, report, {
+      excludeExtraneousValues: true,
+    });
+  }
 
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(
+    @CurrentUser() currentUser: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<void> {
+    await this.reportService.delete(id, currentUser.sub);
+  }
 }

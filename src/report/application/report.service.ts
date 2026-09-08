@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { ImageService } from '../../image/application/image.service';
 import { LevelClassRepositoryAdapter } from '../../level-class/infraestructure/adapter/out/persistence/level-class.repository.adapter';
 import { Evidence } from '../domain/Evidence';
@@ -69,5 +74,33 @@ export class ReportService {
     );
 
     return this.reportRepositoryAdapter.create(report);
+  }
+
+  async rate(reportId: number, userId: string, liked: boolean): Promise<Report> {
+    const report = await this.reportRepositoryAdapter.findById(reportId);
+
+    if (!report) {
+      throw new NotFoundException(`Report with id ${reportId} not found`);
+    }
+
+    report.rate(userId, liked);
+
+    return this.reportRepositoryAdapter.update(report);
+  }
+
+  async delete(reportId: number, userId: string): Promise<void> {
+    const report = await this.reportRepositoryAdapter.findById(reportId);
+
+    if (!report) {
+      throw new NotFoundException(`Report with id ${reportId} not found`);
+    }
+
+    if (report.getAuthorId() !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to delete this report',
+      );
+    }
+
+    await this.reportRepositoryAdapter.delete(reportId);
   }
 }
