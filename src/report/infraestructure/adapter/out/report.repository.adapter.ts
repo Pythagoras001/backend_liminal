@@ -91,6 +91,10 @@ export class ReportRepositoryAdapter {
     const persist = await this.prisma.reportPersist.update({
       where: { id },
       data: {
+        title: entity.getTitle(),
+        nivel: entity.getNivel(),
+        description: entity.getDescription(),
+        levelClass: { connect: { id: entity.getLevelClassId() } },
         likes: {
           create: likesToCreate.map((like) => ({
             userId: like.getUserId(),

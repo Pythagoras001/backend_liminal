@@ -9,6 +9,7 @@ import { LevelClassRepositoryAdapter } from '../../level-class/infraestructure/a
 import { Evidence } from '../domain/Evidence';
 import { Report } from '../domain/Report';
 import { CreateReportDto } from '../infraestructure/adapter/in/rest/dto/request/create-report.dto';
+import { UpdateReportDto } from '../infraestructure/adapter/in/rest/dto/request/update-report.dto';
 import { ReportRepositoryAdapter } from '../infraestructure/adapter/out/report.repository.adapter';
 
 @Injectable()
@@ -84,6 +85,52 @@ export class ReportService {
     }
 
     report.rate(userId, liked);
+
+    return this.reportRepositoryAdapter.update(report);
+  }
+
+  async update(
+    reportId: number,
+    userId: string,
+    dto: UpdateReportDto,
+  ): Promise<Report> {
+    const report = await this.reportRepositoryAdapter.findById(reportId);
+
+    if (!report) {
+      throw new NotFoundException(`Report with id ${reportId} not found`);
+    }
+
+    if (report.getAuthorId() !== userId) {
+      throw new ForbiddenException(
+        'You are not allowed to update this report',
+      );
+    }
+
+    if (dto.levelClassId !== undefined) {
+      const levelClass = await this.levelClassRepositoryAdapter.findById(
+        dto.levelClassId,
+      );
+
+      if (!levelClass) {
+        throw new NotFoundException(
+          `Level class with id ${dto.levelClassId} not found`,
+        );
+      }
+
+      report.changeLevelClassId(dto.levelClassId);
+    }
+
+    if (dto.title !== undefined) {
+      report.changeTitle(dto.title);
+    }
+
+    if (dto.nivel !== undefined) {
+      report.changeNivel(dto.nivel);
+    }
+
+    if (dto.description !== undefined) {
+      report.changeDescription(dto.description);
+    }
 
     return this.reportRepositoryAdapter.update(report);
   }

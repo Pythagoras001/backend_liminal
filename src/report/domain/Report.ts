@@ -7,7 +7,7 @@ export class Report {
         private readonly authorId: string,
         private title: string,
         private nivel: string,
-        private readonly levelClassId: number,
+        private levelClassId: number,
         private description: string,
         private principalEvidence: Evidence,
         private readonly createdAt: Date,
@@ -69,6 +69,10 @@ export class Report {
 
     changeDescription(newDescription: string): void {
         this.description = newDescription;
+    }
+
+    changeLevelClassId(newLevelClassId: number): void {
+        this.levelClassId = newLevelClassId;
     }
 
     changePrincipalEvidence(newPrincipalEvidence: Evidence): void {

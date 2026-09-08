@@ -22,6 +22,7 @@ import { CurrentUser } from '../../../../../auth/infraestructure/adapter/in/rest
 import type { JwtPayload } from '../../../../../auth/infraestructure/security/jwt-payload.interface';
 import { CreateReportDto } from './dto/request/create-report.dto';
 import { RateReportDto } from './dto/request/rate-report.dto';
+import { UpdateReportDto } from './dto/request/update-report.dto';
 import { FindAllReportsQueryDto } from './dto/request/find-all-reports.query.dto';
 import { ResponseReportDto } from './dto/response/response-report.dto';
 import { ResponseReportDetailDto } from './dto/response/response-report-detail.dto';
@@ -132,6 +133,23 @@ export class ReportController {
       rateReportDto.reportId,
       currentUser.sub,
       rateReportDto.liked,
+    );
+
+    return plainToInstance(ResponseReportDto, report, {
+      excludeExtraneousValues: true,
+    });
+  }
+
+  @Patch(':id')
+  async update(
+    @CurrentUser() currentUser: JwtPayload,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateReportDto: UpdateReportDto,
+  ): Promise<ResponseReportDto> {
+    const report = await this.reportService.update(
+      id,
+      currentUser.sub,
+      updateReportDto,
     );
 
     return plainToInstance(ResponseReportDto, report, {
